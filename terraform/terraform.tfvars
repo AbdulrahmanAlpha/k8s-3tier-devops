@@ -1,0 +1,6 @@
+region = "us-east-1"
+cluster_name = "3tier-eks"
+jenkins_key_name = "my-ssh-key"
+aws_account_id = "123456789012"
+db_username = "appuser"
+db_password = "ChangeMe123!"
