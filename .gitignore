@@ -5,7 +5,10 @@ __pycache__/
 
 # C extensions
 *.so
-
+terraform/terraform.tfvars
+*.pem
+jenkins_home/
+*.key
 # Distribution / packaging
 .Python
 build/

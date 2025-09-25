@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>3-Tier Demo</title></head>
+<body>
+<h1>3-Tier App</h1>
+<button onclick="ping()">Ping Backend</button>
+<pre id="out"></pre>
+<script>
+async function ping() {
+  const res = await fetch('/api');
+  document.getElementById('out').innerText = await res.text();
+}
+</script>
+</body>
+</html>

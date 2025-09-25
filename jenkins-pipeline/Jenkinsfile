@@ -1,0 +1,50 @@
+pipeline {
+  agent any
+  environment {
+    AWS_REGION = 'us-east-1'
+    AWS_ACCOUNT = '<YOUR_ACCOUNT_ID>'
+    ECR_FRONTEND = "${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/3tier-frontend"
+    ECR_BACKEND  = "${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/3tier-backend"
+    KUBE_NAMESPACE = "app"
+  }
+  stages {
+    stage('Checkout') { steps { checkout scm } }
+
+    stage('Login to ECR') {
+      steps {
+        sh 'aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com'
+      }
+    }
+
+    stage('Build & Push Backend') {
+      steps {
+        dir('app/backend') {
+          sh 'docker build -t backend:latest .'
+          sh 'docker tag backend:latest $ECR_BACKEND:latest'
+          sh 'docker push $ECR_BACKEND:latest'
+        }
+      }
+    }
+
+    stage('Build & Push Frontend') {
+      steps {
+        dir('app/frontend') {
+          sh 'docker build -t frontend:latest .'
+          sh 'docker tag frontend:latest $ECR_FRONTEND:latest'
+          sh 'docker push $ECR_FRONTEND:latest'
+        }
+      }
+    }
+
+    stage('Deploy to EKS') {
+      steps {
+        // update kubeconfig to access EKS
+        sh 'aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME} --region ${AWS_REGION}'
+        // replace images in manifests and apply
+        sh "kubectl -n ${KUBE_NAMESPACE} set image deployment/backend backend=${ECR_BACKEND}:latest || kubectl -n ${KUBE_NAMESPACE} apply -f k8s/backend-deploy.yaml"
+        sh "kubectl -n ${KUBE_NAMESPACE} set image deployment/frontend frontend=${ECR_FRONTEND}:latest || kubectl -n ${KUBE_NAMESPACE} apply -f k8s/frontend-deploy.yaml"
+        sh "kubectl -n ${KUBE_NAMESPACE} apply -f k8s/backend-svc.yaml -f k8s/frontend-svc.yaml -f k8s/namespace.yaml"
+      }
+    }
+  }
+}

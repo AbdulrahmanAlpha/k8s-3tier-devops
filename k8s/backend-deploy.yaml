@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: <REPLACE_BACKEND_IMAGE>   # Jenkins will substitute full ECR URI
+        ports:
+        - containerPort: 80
+        env:
+        - name: DB_HOST
+          value: "<POSTGRES_ENDPOINT>"   # replace with Terraform output
+        - name: DB_NAME
+          value: "appdb"
+        - name: DB_USER
+          value: "<DB_USER>"
+        - name: DB_PASS
+          value: "<DB_PASSWORD>"
