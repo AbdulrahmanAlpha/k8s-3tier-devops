@@ -19,7 +19,7 @@ The goal was to automate **infrastructure provisioning, CI/CD pipelines, and app
 ---
 
 ## 🏗️ Architecture
-![Architecture Diagram](docs/design.png) <!-- add a diagram later -->
+![Architecture Diagram](docs/%20Architecture%20Diagram.png) <!-- add a diagram later -->
 
 **Key components:**
 1. **Terraform** provisions:
